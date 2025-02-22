@@ -19,6 +19,7 @@ const handler = NextAuth({
 
       if (!existingUser) {
         await User.insertOne({
+          _id: user.email,
           name: user.name,
           email: user.email,
           image: user.image,

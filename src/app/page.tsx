@@ -47,12 +47,12 @@ export default async function Home() {
       </section>
 
       <section>
-        <h2 className="text-2xl font-semibold mb-4">Featured Notes</h2>
+        <h2 className="text-2xl font-semibold mb-4">Featured Notes {"(On Progress ... )"}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
             <Card key={i}>
               <CardHeader>
-                <CardTitle>Introduction to Psychology</CardTitle>
+                <CardTitle>On Progress...</CardTitle>
                 <CardDescription>Faculty of Social Sciences</CardDescription>
               </CardHeader>
               <CardContent>

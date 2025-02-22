@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Faculties, getCoursesByFaculty, getTeachersByFaculty } from "@/lib/data"
 import { CldImage } from 'next-cloudinary';
 
-import { uploadImage } from '@/lib/cloudinary'
+import { uploadFile } from '@/lib/cloudinary'
 
 export default function UploadPage() {
   const { data: session } = useSession()
@@ -49,35 +49,38 @@ export default function UploadPage() {
       return;
     }
 
-    const formData = new FormData()
-    // formData.append("file", file as Blob)
-    formData.append("file", file);
-    formData.append("upload_preset", "note_sharing_platform")
-    console.log("Uploading file:", file)
-    try {
-      console.log("next public cloud name", process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME)
-      const cloudinaryRes = await fetch(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`,
-        {
-          method: "POST",
-          body: formData,
-        },
-      )
+    // const formData = new FormData()
+    // // formData.append("file", file as Blob)
+    // formData.append("file", file);
+    // formData.append("upload_preset", "note_sharing_platform")
+    // console.log("Uploading file:", file)
+    // try {
+    //   console.log("next public cloud name", process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME)
+    //   const cloudinaryRes = await fetch(
+    //     `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`,
+    //     {
+    //       method: "POST",
+    //       body: formData,
+    //     },
+    //   )
 
-      if (!cloudinaryRes.ok) {
-        const errorText = await cloudinaryRes.text();
-        throw new Error(`Cloudinary error: ${errorText}`);
-      }
+    //   if (!cloudinaryRes.ok) {
+    //     const errorText = await cloudinaryRes.text();
+    //     throw new Error(`Cloudinary error: ${errorText}`);
+    //   }
 
-      const cloudinaryData = await cloudinaryRes.json()
-      console.log("Cloudinary data:", cloudinaryData)
+    //   const cloudinaryData = await cloudinaryRes.json()
+    //   console.log("Cloudinary data:", cloudinaryData)
+try {
+    const url = await uploadFile(file);
       const noteData = {
         title,
         description,
         courseCode: selectedCourse,
         teacherId: selectedTeacher,
-        fileUrl: cloudinaryData.secure_url,
-        // userId: session.user?.id||undefined,
+        // fileUrl: cloudinaryData.secure_url,
+        fileUrl: url,
+        userId: session.user?.email||undefined,
       }
 
       const res = await fetch("/api/notes", {
@@ -170,7 +173,7 @@ export default function UploadPage() {
             placeholder="Provide a brief description of your notes"
           />
         </div>
-        {/* <div>
+        <div>
           <Label htmlFor="file">Upload File</Label>
           <Input
             id="file"
@@ -178,7 +181,7 @@ export default function UploadPage() {
             accept=".pdf,.docx,.txt,.jpg,.png"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
           />
-        </div> */}
+        </div>
         
         <Button type="submit" className="w-full">
           Upload Notes

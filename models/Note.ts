@@ -16,9 +16,9 @@ const NoteSchema = new mongoose.Schema(
       required: true,
     },
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: String, // 🔥 Change from ObjectId to String
       required: true,
+      ref: "User", // Still keep the reference for population
     },
     fileUrl: {
       type: String,

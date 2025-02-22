@@ -1,7 +1,8 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema(
   {
+    _id: String, // Allows _id to be email
     name: String,
     email: {
       type: String,
@@ -9,13 +10,17 @@ const UserSchema = new mongoose.Schema(
       unique: true,
     },
     image: String,
-    accessToken: { 
-      type: String,
-      required: false,
-    },
+    accessToken: String,
   },
-  { timestamps: true },
-)
+  { timestamps: true }
+);
 
-export default mongoose.models.User || mongoose.model("User", UserSchema)
+// Automatically set _id to email when saving a new user
+UserSchema.pre("save", function (next) {
+  if (!this._id) {
+    this._id = this.email;
+  }
+  next();
+});
 
+export default mongoose.models.User || mongoose.model("User", UserSchema);
