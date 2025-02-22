@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Search } from "lucide-react"
+import { signIn, signOut, useSession } from "next-auth/react"
 
 export function Header() {
   const pathname = usePathname()
+  const { data: session } = useSession()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -25,12 +27,23 @@ export function Header() {
           </form>
         </div>
         <nav className="flex items-center space-x-2">
-          <Button variant="ghost" asChild>
-            <Link href="/upload">Upload</Link>
-          </Button>
-          <Button variant="ghost" asChild>
-            <Link href="/profile">Profile</Link>
-          </Button>
+          {session ? (
+            <>
+              <Button variant="ghost" asChild>
+                <Link href="/upload">Upload</Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link href="/profile">Profile</Link>
+              </Button>
+              <Button variant="ghost" onClick={() => signOut()}>
+                Logout
+              </Button>
+            </>
+          ) : (
+            <Button variant="ghost" onClick={() => signIn("google")}>
+              Login
+            </Button>
+          )}
           <ModeToggle />
         </nav>
       </div>

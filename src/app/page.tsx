@@ -4,8 +4,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Faculties, Courses } from "@/lib/data"
+import dbConnect from "@/lib/dbConnect"
 
-export default function Home() {
+export default async function Home() {
+  dbConnect();
   return (
     <div className="container mx-auto px-4 py-8">
       <section className="mb-12 text-center">
@@ -30,8 +32,8 @@ export default function Home() {
             </SelectTrigger>
             <SelectContent>
               {Courses.map((course) => (
-                <SelectItem key={course} value={course}>
-                  {course}
+                <SelectItem key={course.code} value={course.name}>
+                  {course.faculty}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -45,12 +47,12 @@ export default function Home() {
       </section>
 
       <section>
-        <h2 className="text-2xl font-semibold mb-4">Featured Notes {"( In Progress ...)" }</h2>
+        <h2 className="text-2xl font-semibold mb-4">Featured Notes</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
             <Card key={i}>
               <CardHeader>
-                <CardTitle>Coming Soon. ..</CardTitle>
+                <CardTitle>Introduction to Psychology</CardTitle>
                 <CardDescription>Faculty of Social Sciences</CardDescription>
               </CardHeader>
               <CardContent>
