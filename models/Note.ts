@@ -9,11 +9,11 @@ const NoteSchema = new mongoose.Schema(
     description: String,
     courseCode: {
       type: String,
-      required: true,
+      // required: true,
     },
     teacherId: {
       type: String,
-      required: true,
+      // required: true,
     },
     userId: {
       type: String, // 🔥 Change from ObjectId to String
@@ -27,7 +27,7 @@ const NoteSchema = new mongoose.Schema(
     comments: [
       {
         userId: {
-          type: mongoose.Schema.Types.ObjectId,
+          type: String,
           ref: "User",
           required: true,
         },
