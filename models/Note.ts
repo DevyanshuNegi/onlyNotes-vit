@@ -11,9 +11,9 @@ const NoteSchema = new mongoose.Schema(
       type: String,
       // required: true,
     },
-    teacherId: {
+    facultyID: {
       type: String,
-      // required: true,
+      required: true,
     },
     userId: {
       type: String, // 🔥 Change from ObjectId to String
@@ -24,6 +24,10 @@ const NoteSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    // module: {
+    //   type: Number,
+    //   required: true,
+    // },
     comments: [
       {
         userId: {

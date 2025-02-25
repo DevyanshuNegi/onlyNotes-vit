@@ -1,4 +1,12 @@
-export const Faculties = ["Arts and Humanities", "Science", "Engineering", "Social Sciences", "Business", "Medicine"]
+export const Faculties = [
+  "Arts and Humanities",
+  "Science",
+  "Engineering",
+  "Social Sciences",
+  "Business",
+  "Medicine",
+  // Add more faculties here
+]
 
 export const Courses = [
   { code: "ENG101", name: "English Literature", faculty: "Arts and Humanities" },
@@ -7,6 +15,7 @@ export const Courses = [
   { code: "PSY101", name: "Psychology", faculty: "Social Sciences" },
   { code: "ECO201", name: "Economics", faculty: "Business" },
   { code: "BIO101", name: "Biology", faculty: "Science" },
+  // Add more courses here
 ]
 
 export const Teachers = [
@@ -15,6 +24,7 @@ export const Teachers = [
   { id: "3", name: "Dr. Michael Johnson", faculty: "Engineering", courses: ["CS301"] },
   { id: "4", name: "Prof. Sarah Brown", faculty: "Social Sciences", courses: ["PSY101"] },
   { id: "5", name: "Dr. Robert Lee", faculty: "Business", courses: ["ECO201"] },
+  // Add more teachers here
 ]
 
 export const getModules = (courseCode: string) => {

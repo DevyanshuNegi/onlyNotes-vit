@@ -1108,9 +1108,12 @@ export function searchFaculty(query:string) {
   if (!query.trim()) return []; // Return empty array if query is empty
 
   const results = fuse.search(query);
-  return results.map(result => result.item); // Extract matching items
+  return results.map(result => result.item.name); // Extract matching items
 }
 
+export function getFacultyByName(name:string) {
+  return facultyData.find(faculty => faculty.name === name);
+}
 // Example usage
 // const userQuery = "Sharma"; // Get user input from CLI or default to "Sharma"
 // const matches = searchFaculty(userQuery);

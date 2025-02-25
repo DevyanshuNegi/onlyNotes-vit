@@ -2,40 +2,80 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Faculties, getCoursesByFaculty, getTeachersByFaculty } from "@/lib/data"
-import { CldImage } from 'next-cloudinary';
-
-import { uploadFile } from '@/lib/cloudinary'
+import { uploadFile } from "@/lib/cloudinary"
+import { getFacultyByName, searchFaculty } from "@/lib/data/FacultiesData"
+import { searchCourse } from "@/lib/data/CoursesData"
 
 export default function UploadPage() {
+  // TODO: Replace this with actull session management
   const { data: session } = useSession()
   const router = useRouter()
+  const [facultySearch, setFacultySearch] = useState("")
+  const [courseSearch, setCourseSearch] = useState("")
   const [selectedFaculty, setSelectedFaculty] = useState("")
   const [selectedCourse, setSelectedCourse] = useState("")
-  const [selectedTeacher, setSelectedTeacher] = useState("")
+  const [module, setModule] = useState("")
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [file, setFile] = useState<File | null>(null)
 
-  const handleFacultyChange = (faculty: string) => {
+  const [filteredFaculties, setFilteredFaculties] = useState<string[]>([])
+  const [filteredCourses, setFilteredCourses] = useState<any[]>([])
+
+  useEffect(() => {
+    setFilteredFaculties(searchFaculty(facultySearch))
+    // setFilteredFaculties(Faculties.filter((faculty) => faculty.toLowerCase().includes(facultySearch.toLowerCase())))
+  }, [facultySearch])
+
+  useEffect(() => {
+    // TODO: Maybe in future
+    // if (selectedFaculty) {
+    //   const courses = getCoursesByFaculty(selectedFaculty)
+    //   setFilteredCourses(
+    //     courses.filter(
+    //       (course) =>
+    //         course.name.toLowerCase().includes(courseSearch.toLowerCase()) ||
+    //         course.code.toLowerCase().includes(courseSearch.toLowerCase()),
+    //     ),
+    //   )
+    // }
+    setFilteredCourses(searchCourse(courseSearch))
+  }, [courseSearch])
+
+
+  const handleFacultySelect = (faculty: string) => {
     setSelectedFaculty(faculty)
-    setSelectedCourse("")
-    setSelectedTeacher("")
+    setFacultySearch(faculty)
+    // setFilteredFaculties([]);
+    // setCourseSearch("")
+    // setSelectedCourse("")
+  }
+  // Close dropdown when faculty is selected
+  useEffect(() => {
+    if (selectedFaculty) {
+      setFilteredFaculties([]);
+    }
+  }, [selectedFaculty]);
+  
+  const handleCourseSelect = (course: any) => {
+    setSelectedCourse(course.code)
+    setCourseSearch(`${course.name} (${course.code})`)
+    // setFilteredCourses([]);
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+  // Close dropdown when course is selected
+  useEffect(() => {
+    if (selectedCourse) {
+      setFilteredCourses([]);
     }
-  };
+  }, [selectedCourse]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,39 +89,19 @@ export default function UploadPage() {
       return;
     }
 
-    // const formData = new FormData()
-    // // formData.append("file", file as Blob)
-    // formData.append("file", file);
-    // formData.append("upload_preset", "note_sharing_platform")
-    // console.log("Uploading file:", file)
-    // try {
-    //   console.log("next public cloud name", process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME)
-    //   const cloudinaryRes = await fetch(
-    //     `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`,
-    //     {
-    //       method: "POST",
-    //       body: formData,
-    //     },
-    //   )
-
-    //   if (!cloudinaryRes.ok) {
-    //     const errorText = await cloudinaryRes.text();
-    //     throw new Error(`Cloudinary error: ${errorText}`);
-    //   }
-
-    //   const cloudinaryData = await cloudinaryRes.json()
-    //   console.log("Cloudinary data:", cloudinaryData)
 try {
-    const url = await uploadFile(file);
-      const noteData = {
-        title,
-        description,
-        courseCode: selectedCourse,
-        teacherId: selectedTeacher,
-        // fileUrl: cloudinaryData.secure_url,
-        fileUrl: url,
-        userId: session.user?.email||undefined,
-      }
+  const tempfaculty = getFacultyByName(selectedFaculty);
+  const facultyID = tempfaculty ? tempfaculty._id : undefined;
+  const url = await uploadFile(file);
+  const noteData = {
+    title,
+    description,
+    courseCode: selectedCourse,
+    facultyID,
+    // fileUrl: cloudinaryData.secure_url,
+    fileUrl: url,
+    userId: session.user?.email || undefined,
+  }
 
       const res = await fetch("/api/notes", {
         method: "POST",
@@ -110,51 +130,61 @@ try {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Upload Notes</h1>
       <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
-        <div>
+        <div className="relative">
           <Label htmlFor="faculty">Faculty</Label>
-          <Select onValueChange={handleFacultyChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Faculty" />
-            </SelectTrigger>
-            <SelectContent>
-              {Faculties.map((faculty) => (
-                <SelectItem key={faculty} value={faculty}>
+          <Input
+            id="faculty"
+            value={facultySearch}
+            onChange={(e) => setFacultySearch(e.target.value)}
+            placeholder="Search for a faculty"
+          />
+          {filteredFaculties.length > 0 && (
+            <ul className="absolute z-10 w-full bg-white border border-gray-300 mt-1 max-h-60 overflow-auto">
+              {filteredFaculties.map((faculty) => (
+                <li
+                  key={faculty}
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => handleFacultySelect(faculty)}
+                >
                   {faculty}
-                </SelectItem>
+                </li>
               ))}
-            </SelectContent>
-          </Select>
+            </ul>
+          )}
         </div>
-        <div>
+        <div className="relative">
           <Label htmlFor="course">Course</Label>
-          <Select onValueChange={setSelectedCourse}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Course" />
-            </SelectTrigger>
-            <SelectContent>
-              {getCoursesByFaculty(selectedFaculty).map((course) => (
-                <SelectItem key={course.code} value={course.code}>
+          <Input
+            id="course"
+            value={courseSearch}
+            onChange={(e) => setCourseSearch(e.target.value)}
+            placeholder="Search for a course"
+            // disabled={!selectedFaculty}
+          />
+          {filteredCourses.length > 0 && (
+            <ul className="absolute z-10 w-full bg-white border border-gray-300 mt-1 max-h-60 overflow-auto">
+              {filteredCourses.map((course) => (
+                <li
+                  key={course.code}
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => handleCourseSelect(course)}
+                >
                   {course.name} ({course.code})
-                </SelectItem>
+                </li>
               ))}
-            </SelectContent>
-          </Select>
+            </ul>
+          )}
         </div>
-        <div>
-          <Label htmlFor="teacher">Teacher</Label>
-          <Select onValueChange={setSelectedTeacher}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Teacher" />
-            </SelectTrigger>
-            <SelectContent>
-              {getTeachersByFaculty(selectedFaculty).map((teacher) => (
-                <SelectItem key={teacher.id} value={teacher.id}>
-                  {teacher.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {/* TODO: Also implement module functionality */}
+        {/* <div>
+          <Label htmlFor="module">Module Number</Label>
+          <Input
+            id="module"
+            value={module}
+            onChange={(e) => setModule(e.target.value)}
+            placeholder="1"
+          />
+        </div> */}
         <div>
           <Label htmlFor="title">Note Title</Label>
           <Input
@@ -182,7 +212,6 @@ try {
             onChange={(e) => setFile(e.target.files?.[0] || null)}
           />
         </div>
-        
         <Button type="submit" className="w-full">
           Upload Notes
         </Button>

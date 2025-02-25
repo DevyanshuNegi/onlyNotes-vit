@@ -414,7 +414,7 @@ const fuse = new Fuse(CourseData, fuseOptions);
  * @param query The user-entered search query.
  * @returns A list of matching courses.
  */
-export function searchCourses(query: string) {
+export function searchCourse(query: string) {
     if (!query || query.trim() === '') {
         return [];
     }
@@ -425,9 +425,12 @@ export function searchCourses(query: string) {
     return results.map(result => result.item);
 }
 
+export function getCourseByCode(code: string) {
+    return CourseData.find((course) => course.code === code)
+}
 
 
 // for fuse testing :
 
 // deno run src/lib/data/ColurData.ts
-console.log(searchCourses("dasa struter"));
+// console.log(searchCourse("dasa struter"));
