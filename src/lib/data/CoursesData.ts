@@ -1,3 +1,4 @@
+import Fuse from 'fuse.js';
 
 interface Course {
     code: string;
@@ -398,3 +399,35 @@ interface Course {
 },])
 
 
+// Configure Fuse.js options for fuzzy matching
+const fuseOptions = {
+    keys: ['code', 'name'], // search both code and title
+    threshold: 0.3,          // adjust threshold for sensitivity (lower = stricter)
+};
+
+
+// Create a Fuse instance (this is lightweight given the data size)
+const fuse = new Fuse(CourseData, fuseOptions);
+
+/**
+ * Searches for courses matching the given query.
+ * @param query The user-entered search query.
+ * @returns A list of matching courses.
+ */
+export function searchCourses(query: string) {
+    if (!query || query.trim() === '') {
+        return [];
+    }
+
+    // Use Fuse to search the courses array
+    const results = fuse.search(query);
+    // Return only the course objects
+    return results.map(result => result.item);
+}
+
+
+
+// for fuse testing :
+
+// deno run src/lib/data/ColurData.ts
+console.log(searchCourses("dasa struter"));
